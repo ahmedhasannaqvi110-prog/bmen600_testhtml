@@ -1,0 +1,598 @@
+<meta charset="utf-8">
+<title>Future Cognitive Risk Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: two-pane clinical instrument. Left: a quiet intake form in three cards. Right: a sticky result pane
+   (risk dial, 100-person icon array, factor contribution bar). Below: the 0-12 score track, then collapsible method notes. */
+:root {
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #f6f8fa;
+  --ink: #142029;
+  --muted: #5d6b76;
+  --faint: #97a3ad;
+  --line: #dde3e8;
+  --accent: #2c5ea8;
+  --accent-soft: #e5edf8;
+  --low: #2e8b6e;
+  --mid: #c68a1d;
+  --high: #c2412f;
+  --on-color: #ffffff;
+  --warn-bg: #fff4dc;
+  --warn-ink: #7a4b00;
+  --shadow: 0 1px 2px rgba(20, 32, 41, .05), 0 8px 24px rgba(20, 32, 41, .06);
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --radius: 14px;
+  --cat: var(--mid);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1419; --surface: #161e25; --surface-2: #1c262e; --ink: #e6edf2; --muted: #9aa8b3; --faint: #66737d;
+    --line: #26323b; --accent: #7ea8ea; --accent-soft: #1d2a3c; --low: #45b08f; --mid: #e0a93f; --high: #e36452;
+    --on-color: #0e1419; --warn-bg: #352a12; --warn-ink: #f2cf86; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1419; --surface: #161e25; --surface-2: #1c262e; --ink: #e6edf2; --muted: #9aa8b3; --faint: #66737d;
+  --line: #26323b; --accent: #7ea8ea; --accent-soft: #1d2a3c; --low: #45b08f; --mid: #e0a93f; --high: #e36452;
+  --on-color: #0e1419; --warn-bg: #352a12; --warn-ink: #f2cf86; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.5 var(--font-body); margin: 0; padding-inline: 16px; padding-block: 28px 120px; }
+@media (min-width: 900px) { body { padding-block: 36px 56px; } }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 22px; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 24px; }
+.title { display: grid; gap: 8px; max-width: 62ch; }
+.kicker { display: inline-flex; gap: 8px; align-items: center; font: 500 12px/1 var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+.kicker i { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+h1 { font: 800 clamp(28px, 4.6vw, 44px)/1.02 var(--font-display); letter-spacing: -.025em; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); }
+.examples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.examples span { font-size: 13px; color: var(--muted); margin-right: 2px; }
+.chip { font: 600 13px var(--font-body); border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 13px; cursor: pointer; display: inline-flex; gap: 7px; align-items: center; transition: border-color .15s, transform .15s; }
+.chip:hover { border-color: var(--faint); transform: translateY(-1px); }
+.chip i { width: 8px; height: 8px; border-radius: 50%; }
+.chip.ghost { background: transparent; color: var(--muted); }
+
+/* main layout */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 22px; align-items: start; }
+@media (max-width: 899px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); min-width: 0; }
+.intake { display: grid; gap: 14px; }
+.step { padding: 18px 20px 20px; display: grid; gap: 14px; }
+.step-head { display: flex; align-items: center; gap: 10px; }
+.step-head b { font: 600 12px/1 var(--font-data); color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 5px 7px; }
+.step-head h2 { font: 700 18px/1.2 var(--font-display); margin: 0; letter-spacing: -.01em; }
+.step-head .sub { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+.field { display: grid; gap: 7px; min-width: 0; }
+.field > label, .field > .label { font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; gap: 8px; }
+.field .unit { font: 400 12px var(--font-data); color: var(--muted); }
+.hint { font-size: 12.5px; color: var(--muted); }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 480px) { .pair { grid-template-columns: minmax(0, 1fr); } }
+
+/* stepper */
+.stepper { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); overflow: hidden; }
+.stepper button { border: 0; background: transparent; color: var(--muted); font: 600 20px/1 var(--font-body); cursor: pointer; }
+.stepper button:hover { background: var(--accent-soft); color: var(--accent); }
+.stepper input { border: 0; background: transparent; text-align: center; min-width: 0; }
+input[type="number"] { font: 500 18px var(--font-data); color: var(--ink); padding: 10px 6px; width: 100%; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.boxed { border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); padding-inline: 12px !important; text-align: left; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* segmented */
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 3px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { text-align: center; padding: 8px 6px; border-radius: 7px; font: 600 14px var(--font-body); color: var(--muted); cursor: pointer; transition: background .15s, color .15s; white-space: nowrap; }
+.seg input:checked + label { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(20,32,41,.12); }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+.hist { display: grid; gap: 12px; }
+.hist-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 210px); gap: 12px; align-items: center; }
+@media (max-width: 480px) { .hist-row { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.hist-row .q { font-weight: 700; font-size: 14px; }
+.hist-row .q small { display: block; font-weight: 400; color: var(--muted); font-size: 12.5px; }
+
+/* bell curve */
+.bell { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px 6px; }
+.bell svg { width: 100%; height: auto; display: block; }
+.bell .cap { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.bell .cap b { font: 600 12.5px var(--font-data); color: var(--ink); }
+
+/* pre-test */
+.pre { display: grid; gap: 10px; }
+.pre-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.pre-row output { font: 600 22px var(--font-data); min-width: 3.4ch; text-align: right; }
+.warn { background: var(--warn-bg); color: var(--warn-ink); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; }
+
+/* result pane */
+.result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 16px); overflow: hidden; }
+@media (max-width: 899px) { .result { position: static; } }
+.result-top { padding: 22px 22px 18px; display: grid; gap: 16px; background: linear-gradient(180deg, color-mix(in srgb, var(--cat) 10%, var(--surface)), var(--surface)); border-bottom: 1px solid var(--line); transition: background .3s; }
+.verdict { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.dial { position: relative; width: 132px; aspect-ratio: 1; max-width: 100%; }
+.dial svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dial .track { stroke: var(--line); }
+.dial .val { stroke: var(--cat); transition: stroke-dashoffset .5s cubic-bezier(.2,.8,.2,1), stroke .3s; }
+.dial .center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.dial .center b { font: 800 40px/1 var(--font-display); letter-spacing: -.03em; }
+.dial .center span { font: 500 11px/1.3 var(--font-data); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.pill { justify-self: start; display: inline-flex; align-items: center; gap: 7px; font: 600 12px/1 var(--font-data); letter-spacing: .07em; text-transform: uppercase; color: var(--on-color); background: var(--cat); border-radius: 999px; padding: 6px 11px; transition: background .3s; }
+.verdict h3 { font: 700 21px/1.2 var(--font-display); margin: 6px 0 4px; letter-spacing: -.01em; text-wrap: balance; }
+.verdict p { margin: 0; color: var(--muted); font-size: 14px; }
+
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.metric { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; gap: 2px; }
+.metric .k { font-size: 11.5px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.metric .v { font: 600 21px/1.15 var(--font-data); font-variant-numeric: tabular-nums; }
+.metric .r { font: 400 11.5px var(--font-data); color: var(--muted); }
+
+.result-body { padding: 18px 22px 22px; display: grid; gap: 20px; }
+.section-label { font: 600 12px/1 var(--font-data); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; gap: 8px; }
+.section-label em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--faint); }
+
+/* icon array */
+.people { display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 4px; }
+.people i { aspect-ratio: 1; border-radius: 50%; background: var(--line); transition: background .3s; }
+.people i.on { background: var(--cat); }
+.people i.maybe { background: color-mix(in srgb, var(--cat) 30%, var(--line)); }
+.people-cap { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.people-cap b { color: var(--ink); font-family: var(--font-data); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 9px; height: 9px; border-radius: 50%; }
+
+/* contribution */
+.contrib-bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); }
+.contrib-bar span { height: 100%; transition: flex-grow .4s ease; }
+.contrib-list { display: grid; gap: 7px; margin-top: 12px; }
+.contrib-row { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; font-size: 14px; }
+.contrib-row i { width: 10px; height: 10px; border-radius: 3px; align-self: center; }
+.contrib-row small { color: var(--muted); font-size: 12.5px; display: block; }
+.contrib-row b { font: 600 14px var(--font-data); font-variant-numeric: tabular-nums; }
+.contrib-row.zero { opacity: .55; }
+
+/* score track */
+.track-card { padding: 20px 22px; }
+.track-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; margin-bottom: 14px; }
+.track-head h2 { font: 700 18px/1.2 var(--font-display); margin: 0; }
+.track-scroll { overflow-x: auto; padding-bottom: 4px; }
+.track { position: relative; min-width: 720px; padding-top: 38px; }
+.cats { display: grid; grid-template-columns: 8fr 2fr 7fr; gap: 4px; margin-bottom: 6px; }
+.cats span { font: 600 11.5px var(--font-data); text-transform: uppercase; letter-spacing: .05em; color: var(--faint); border-top: 3px solid var(--line); padding-top: 6px; transition: color .2s, border-color .2s; white-space: nowrap; }
+.cats span.on { color: var(--ink); }
+.cats span[data-cat="low"].on { border-color: var(--low); }
+.cats span[data-cat="medium"].on { border-color: var(--mid); }
+.cats span[data-cat="high"].on { border-color: var(--high); }
+.cells { display: grid; grid-template-columns: repeat(17, minmax(0, 1fr)); gap: 4px; }
+.cell { border-radius: 8px; padding: 9px 4px 8px; text-align: center; background: var(--surface-2); border: 1px solid var(--line); display: grid; gap: 2px; transition: background .2s, color .2s, transform .2s; }
+.cell .s { font: 700 15px var(--font-display); }
+.cell .l { font: 500 10.5px var(--font-data); color: var(--muted); }
+.cell.on { background: var(--cat); color: var(--on-color); border-color: transparent; transform: translateY(-3px); box-shadow: var(--shadow); }
+.cell.on .l { color: inherit; opacity: .85; }
+.marker { position: absolute; top: 0; transform: translateX(-50%); font: 600 11.5px var(--font-data); background: var(--ink); color: var(--surface); border-radius: 6px; padding: 4px 8px; white-space: nowrap; transition: left .35s cubic-bezier(.2,.8,.2,1); }
+.marker::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: var(--ink); }
+
+/* details */
+.more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .more { grid-template-columns: minmax(0, 1fr); } }
+details.card { padding: 0; }
+details summary { list-style: none; cursor: pointer; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; font: 700 16px var(--font-display); }
+details summary::-webkit-details-marker { display: none; }
+details summary::after { content: "+"; font: 400 22px/1 var(--font-body); color: var(--muted); transition: transform .2s; }
+details[open] summary::after { transform: rotate(45deg); }
+details .inner { padding: 0 20px 18px; display: grid; gap: 12px; font-size: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 8px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 11.5px var(--font-data); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+td.n { font-family: var(--font-data); white-space: nowrap; }
+.formula { font: 400 12.5px/1.65 var(--font-data); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; overflow-x: auto; margin: 0; }
+.notes { margin: 0; padding-left: 18px; display: grid; gap: 8px; color: var(--ink); }
+.notes li::marker { color: var(--accent); }
+footer { font-size: 12.5px; color: var(--muted); text-align: center; }
+
+/* mobile sticky summary */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 20px rgba(20,32,41,.08); display: none; align-items: center; gap: 12px; z-index: 10; }
+.dock .pill { flex: none; }
+.dock .txt { flex: 1; min-width: 0; font-size: 14px; }
+.dock .txt b { font: 700 18px var(--font-display); }
+.dock a { font: 600 13px var(--font-body); color: var(--accent); text-decoration: none; white-space: nowrap; }
+@media (max-width: 899px) { .dock { display: flex; } }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="title">
+      <span class="kicker"><i></i>Research prototype · OASIS-3 · 782 adults aged 42–97</span>
+      <h1>Future Cognitive Risk Scale</h1>
+      <p class="lede">Five-year probability that a cognitively normal adult develops cognitive impairment (CDR ≥ 0.5), from one MRI and five clinical factors.</p>
+    </div>
+    <div class="examples" aria-label="Load an example patient">
+      <span>Examples</span>
+      <button class="chip" type="button" data-ex="low"><i style="background:var(--low)"></i>Low</button>
+      <button class="chip" type="button" data-ex="medium"><i style="background:var(--mid)"></i>Medium</button>
+      <button class="chip" type="button" data-ex="high"><i style="background:var(--high)"></i>High</button>
+      <button class="chip ghost" type="button" id="clear">Clear</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <form class="intake" id="f" novalidate>
+      <section class="card step" aria-labelledby="s1">
+        <div class="step-head"><b>01</b><h2 id="s1">Patient</h2></div>
+        <div class="pair">
+          <div class="field">
+            <label for="age">Age <span class="unit">years</span></label>
+            <div class="stepper">
+              <button type="button" data-step="age" data-d="-1" aria-label="Decrease age">−</button>
+              <input id="age" type="number" min="40" max="110" step="1" inputmode="numeric">
+              <button type="button" data-step="age" data-d="1" aria-label="Increase age">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="educ">Education <span class="unit">years</span></label>
+            <div class="stepper">
+              <button type="button" data-step="educ" data-d="-1" aria-label="Decrease education">−</button>
+              <input id="educ" type="number" min="0" max="30" step="1" inputmode="numeric">
+              <button type="button" data-step="educ" data-d="1" aria-label="Increase education">+</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card step" aria-labelledby="s2">
+        <div class="step-head"><b>02</b><h2 id="s2">MRI volumes</h2><span class="sub">FreeSurfer, mm³</span></div>
+        <div class="pair">
+          <div class="field">
+            <label for="hip">Hippocampus <span class="unit">L + R</span></label>
+            <input id="hip" class="boxed" type="number" min="1000" max="15000" step="10" inputmode="numeric" aria-describedby="hip-range">
+            <span class="hint" id="hip-range">Typical 5,580–9,520 · cohort range 4,010–10,870</span>
+          </div>
+          <div class="field">
+            <label for="icv">Intracranial volume</label>
+            <input id="icv" class="boxed" type="number" min="500000" max="3000000" step="1000" inputmode="numeric" aria-describedby="icv-range">
+            <span class="hint" id="icv-range">Typical 1,160,000–1,840,000 · cohort range 870,000–2,030,000</span>
+          </div>
+        </div>
+        <div class="bell" aria-hidden="true">
+          <svg viewBox="0 0 320 78" id="bell"></svg>
+          <div class="cap"><span>Healthy people the same age</span><span id="bell-cap">–</span></div>
+        </div>
+      </section>
+
+      <section class="card step" aria-labelledby="s3">
+        <div class="step-head"><b>03</b><h2 id="s3">History</h2></div>
+        <div class="hist">
+          <div class="hist-row">
+            <span class="q" id="q-dep">Depression in the last 2 years</span>
+            <div class="seg" role="radiogroup" aria-labelledby="q-dep">
+              <input type="radio" name="dep" id="dep0" value="0"><label for="dep0">No</label>
+              <input type="radio" name="dep" id="dep1" value="1"><label for="dep1">Yes</label>
+            </div>
+          </div>
+          <div class="hist-row">
+            <span class="q" id="q-apoe">APOE ε4 carrier<small>Genetic test</small></span>
+            <div class="seg" role="radiogroup" aria-labelledby="q-apoe">
+              <input type="radio" name="apoe" id="apoe0" value="0"><label for="apoe0">No</label>
+              <input type="radio" name="apoe" id="apoe1" value="1"><label for="apoe1">Yes</label>
+              <input type="radio" name="apoe" id="apoeU" value="u"><label for="apoeU">Unknown</label>
+            </div>
+          </div>
+          <div class="hist-row">
+            <span class="q" id="q-htn">Hypertension<small>Recorded, scores 0 (no effect in cohort)</small></span>
+            <div class="seg" role="radiogroup" aria-labelledby="q-htn">
+              <input type="radio" name="htn" id="htn0" value="0"><label for="htn0">No</label>
+              <input type="radio" name="htn" id="htn1" value="1"><label for="htn1">Yes</label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card step" aria-labelledby="s4">
+        <div class="step-head"><b>04</b><h2 id="s4">Starting estimate</h2><span class="sub">5-year pre-test</span></div>
+        <div class="pre">
+          <div class="pre-row">
+            <input id="pretest" type="range" min="1" max="60" step="1" aria-labelledby="s4">
+            <output id="pt-out" for="pretest">–</output>
+          </div>
+          <div class="seg" role="radiogroup" aria-label="Pre-test presets" id="presets">
+            <input type="radio" name="pp" id="pp5" value="5"><label for="pp5">60s · 5%</label>
+            <input type="radio" name="pp" id="pp10" value="10"><label for="pp10">70s · 10%</label>
+            <input type="radio" name="pp" id="pp20" value="18"><label for="pp20">Cohort · 18%</label>
+          </div>
+          <span class="hint">Risk you would estimate before the scale. The cohort figure (18%) comes from a research sample enriched for family history; routine practice is usually lower.</span>
+        </div>
+        <div id="warn" class="warn" hidden></div>
+      </section>
+    </form>
+
+    <aside class="card result" id="result" aria-live="polite" aria-label="Result">
+      <div class="result-top">
+        <div class="verdict">
+          <div class="dial">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"></circle>
+              <circle class="val" id="dial" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+            </svg>
+            <div class="center"><b id="score">–</b><span>of 16 pts</span></div>
+          </div>
+          <div>
+            <span class="pill" id="pill">–</span>
+            <h3 id="headline">–</h3>
+            <p id="advice">–</p>
+          </div>
+        </div>
+        <div class="metrics">
+          <div class="metric"><span class="k">5-year risk</span><span class="v" id="m-post">–</span><span class="r" id="m-post-r"></span></div>
+          <div class="metric"><span class="k">Likelihood ratio</span><span class="v" id="m-lr">–</span><span class="r" id="m-lr-r"></span></div>
+          <div class="metric"><span class="k">Pre-test</span><span class="v" id="m-pre">–</span><span class="r">your estimate</span></div>
+        </div>
+      </div>
+      <div class="result-body">
+        <div>
+          <p class="section-label">Out of 100 people like this <em>within 5 years</em></p>
+          <div class="people" id="people" role="img"></div>
+          <p class="people-cap" id="people-cap"></p>
+          <div class="legend"><span><i style="background:var(--cat)"></i>Expected to decline</span><span><i style="background:color-mix(in srgb, var(--cat) 30%, var(--line))"></i>Within the 95% range</span><span><i style="background:var(--line)"></i>Expected to stay well</span></div>
+        </div>
+        <div>
+          <p class="section-label">What drives the score</p>
+          <div class="contrib-bar" id="contrib-bar"></div>
+          <div class="contrib-list" id="contrib-list"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="card track-card" aria-labelledby="t-h">
+    <div class="track-head">
+      <h2 id="t-h">Score and likelihood ratio</h2>
+      <span class="hint">Cross-validated LR for 5-year conversion at each score</span>
+    </div>
+    <div class="track-scroll">
+      <div class="track">
+        <div class="marker" id="marker">–</div>
+        <div class="cats" aria-hidden="true">
+          <span data-cat="low">Low · 0–7</span>
+          <span data-cat="medium">Med · 8–9</span>
+          <span data-cat="high">High · 10–16</span>
+        </div>
+        <div class="cells" id="cells"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="more">
+    <details class="card">
+      <summary>How the score is built</summary>
+      <div class="inner">
+        <table>
+          <thead><tr><th>Factor</th><th>Points</th></tr></thead>
+          <tbody>
+            <tr><td>Age &lt;50 · 50–54 · 55–59 · 60–64 · 65–69 · 70–74 · 75–79 · 80–84 · 85+</td><td class="n">0 · 1 · 2 · 3 · 4 · 5 · 6 · 7 · 8</td></tr>
+            <tr><td>Hippocampus for age: &gt;+1 · 0 to +1 · −1 to 0 · −2 to −1 · &lt;−2 SD</td><td class="n">0 · 1 · 2 · 3 · 4</td></tr>
+            <tr><td>Education 12 years or less</td><td class="n">1</td></tr>
+            <tr><td>Depression in the last 2 years</td><td class="n">2</td></tr>
+            <tr><td>APOE ε4 carrier</td><td class="n">1</td></tr>
+            <tr><td>Hypertension</td><td class="n">0</td></tr>
+          </tbody>
+        </table>
+        <pre class="formula">ratio    = hippocampus ÷ intracranial volume × 1000
+expected = 7.838 − 0.03761 × age
+z        = (ratio − expected) ÷ 0.684
+1 point  = hazard of 5 extra years of age (Cox model)
+post-test odds = pre-test odds × LR</pre>
+      </div>
+    </details>
+    <details class="card">
+      <summary>Risk groups in the derivation cohort</summary>
+      <div class="inner">
+        <table>
+          <thead><tr><th>Group</th><th>Share</th><th>LR (95% CI)</th><th>Observed</th></tr></thead>
+          <tbody>
+            <tr><td>Low · 0–7</td><td class="n">62%</td><td class="n">0.32 (0.22–0.44)</td><td class="n">7%</td></tr>
+            <tr><td>Medium · 8–9</td><td class="n">25%</td><td class="n">1.74 (1.27–2.30)</td><td class="n">28%</td></tr>
+            <tr><td>High · 10–16</td><td class="n">13%</td><td class="n">5.70 (3.92–9.41)</td><td class="n">56%</td></tr>
+          </tbody>
+        </table>
+        <span class="hint">Observed: Kaplan–Meier 5-year conversion. Cross-validated AUC 0.78 (10-fold, 5 repeats). 190 of 782 participants converted during follow-up.</span>
+      </div>
+    </details>
+    <details class="card" style="grid-column: 1 / -1">
+      <summary>Before you use it</summary>
+      <div class="inner">
+        <ul class="notes">
+          <li>Predicts any cognitive impairment (CDR ≥ 0.5) within 5 years, not biomarker-confirmed Alzheimer's disease. Applies only to people who are cognitively normal now.</li>
+          <li>Derived on 782 cognitively normal adults aged 42–97 in OASIS-3 (Knight ADRC, St. Louis), a mostly white, highly educated research cohort. Validation is internal only; it needs external testing, for example in ADNI.</li>
+          <li>Volumes must come from FreeSurfer or a comparable pipeline. Other software can measure on a different scale. In the cohort, total hippocampal volume was typically 5,580–9,520 mm³ (men 5,690–9,910, women 5,510–9,140; full range 4,010–10,870) and intracranial volume 1,160,000–1,840,000 mm³ (men 1,360,000–1,910,000, women 1,100,000–1,670,000; full range 870,000–2,030,000). Values outside the full range are extrapolations.</li>
+          <li>Recent depression may partly be an early symptom of decline rather than a cause. Treat it as a marker.</li>
+          <li>APOE "Unknown" scores 0 and underestimates risk for carriers, about one in three people in the cohort.</li>
+          <li>Hypertension carried no independent risk in this cohort (HR 1.05) and scores 0; a single yes/no history item may miss the effect of long-standing midlife blood pressure. Physical activity is not included: OASIS-3 does not record it.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <footer>Research prototype for discussion. Not a medical device and not for clinical decisions. Data: OASIS-3, Knight ADRC, Washington University in St. Louis.</footer>
+</div>
+
+<div class="dock" aria-hidden="true">
+  <span class="pill" id="dock-pill">–</span>
+  <span class="txt"><b id="dock-risk">–</b> 5-year risk · score <span id="dock-score">–</span></span>
+  <a href="#result">Details</a>
+</div>
+
+<script>
+const NORM = { slope: -0.03760786938253079, intercept: 7.838112378200702, sd: 0.6835791281441219 };
+const AGE_PTS = [[0, 0], [50, 1], [55, 2], [60, 3], [65, 4], [70, 5], [75, 6], [80, 7], [85, 8]];
+const HIP_BANDS = [{ max: -2, pts: 4, label: "more than 2 SD below" }, { max: -1, pts: 3, label: "1–2 SD below" },
+                   { max: 0, pts: 2, label: "up to 1 SD below" }, { max: 1, pts: 1, label: "up to 1 SD above" },
+                   { max: Infinity, pts: 0, label: "more than 1 SD above" }];
+// cross-validated LR for 5-year conversion; bands from scripts/35_oasis3_lr_table.py
+const BANDS = [
+  { lo: 0, hi: 4, lr: 0.09, ci: [0.0, 0.24] }, { lo: 5, hi: 6, lr: 0.49, ci: [0.29, 0.71] },
+  { lo: 7, hi: 7, lr: 0.28, ci: [0.09, 0.51] }, { lo: 8, hi: 9, lr: 1.74, ci: [1.27, 2.30] },
+  { lo: 10, hi: 10, lr: 4.17, ci: [2.37, 7.94] }, { lo: 11, hi: 16, lr: 8.29, ci: [4.33, 21.81] },
+];
+const CATS = {
+  low: { name: "Low risk", color: "--low", head: "Lower than average chance of decline", advice: "Routine follow-up. The scale argues against impairment developing within 5 years." },
+  medium: { name: "Medium risk", color: "--mid", head: "Somewhat raised chance of decline", advice: "Consider a repeat cognitive assessment in 1–2 years." },
+  high: { name: "High risk", color: "--high", head: "Clearly raised chance of decline", advice: "Consider closer follow-up and a full memory assessment." },
+};
+const FACTOR_COLORS = { age: "#6b7c8a", hip: "#2c5ea8", edu: "#8d6bb8", dep: "#c06c9a", apoe: "#d08a3a", htn: "#9aa5ae" };
+const EXAMPLES = {
+  low: { age: 58, educ: 18, hip: 8100, icv: 1480000, dep: "0", apoe: "0", htn: "0" },
+  medium: { age: 72, educ: 16, hip: 6900, icv: 1500000, dep: "0", apoe: "1", htn: "1" },
+  high: { age: 81, educ: 12, hip: 5600, icv: 1450000, dep: "1", apoe: "1", htn: "1" },
+};
+
+const $ = id => document.getElementById(id);
+const fmtLR = x => (x < 1 ? x.toFixed(2) : x.toFixed(1));
+const pct = x => (x < 0.01 ? "<1%" : Math.round(x * 100) + "%");
+const radio = n => (document.querySelector(`input[name="${n}"]:checked`) || {}).value;
+const setRadio = (n, v) => { const el = document.querySelector(`input[name="${n}"][value="${v}"]`); if (el) el.checked = true; };
+const catOf = s => (s <= 7 ? "low" : s <= 9 ? "medium" : "high");
+
+// static pieces
+$("people").innerHTML = "<i></i>".repeat(100);
+$("cells").innerHTML = Array.from({ length: 17 }, (_, s) => {
+  const b = BANDS.find(x => s >= x.lo && s <= x.hi);
+  return `<div class="cell" data-s="${s}"><span class="s">${s}</span><span class="l">${fmtLR(b.lr)}</span></div>`;
+}).join("");
+const normPdf = x => Math.exp(-x * x / 2);
+const bx = z => 160 + z * 48;                                    // z in [-3.2, 3.2] -> x
+let bellPath = "";
+for (let z = -3.2; z <= 3.21; z += 0.1) bellPath += `${z <= -3.2 ? "M" : "L"}${bx(z).toFixed(1)},${(66 - normPdf(z) * 54).toFixed(1)}`;
+function drawBell(z) {
+  const zc = Math.max(-3.1, Math.min(3.1, z));
+  let shade = "";
+  for (let t = -3.2; t <= zc; t += 0.05) shade += `${t <= -3.2 ? "M" : "L"}${bx(t).toFixed(1)},${(66 - normPdf(t) * 54).toFixed(1)}`;
+  shade += `L${bx(zc).toFixed(1)},66 L${bx(-3.2).toFixed(1)},66 Z`;
+  $("bell").innerHTML =
+    [-2, -1, 0, 1, 2].map(t => `<line x1="${bx(t)}" x2="${bx(t)}" y1="10" y2="66" stroke="var(--line)" stroke-width="1"/>
+      <text x="${bx(t)}" y="77" text-anchor="middle" font-size="8.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">${t > 0 ? "+" + t : t}</text>`).join("") +
+    `<path d="${shade}" fill="var(--cat)" opacity=".18"/>
+     <path d="${bellPath}" fill="none" stroke="var(--faint)" stroke-width="1.5"/>
+     <line x1="${bx(zc)}" x2="${bx(zc)}" y1="4" y2="66" stroke="var(--cat)" stroke-width="2.5" stroke-linecap="round"/>
+     <circle cx="${bx(zc)}" cy="${(66 - normPdf(zc) * 54).toFixed(1)}" r="4" fill="var(--cat)" stroke="var(--surface)" stroke-width="1.5"/>`;
+}
+
+function load(ex) {
+  for (const k of ["age", "educ", "hip", "icv"]) $(k).value = ex[k];
+  setRadio("dep", ex.dep); setRadio("apoe", ex.apoe); setRadio("htn", ex.htn);
+  compute();
+}
+
+function compute() {
+  const age = parseFloat($("age").value), educ = parseFloat($("educ").value);
+  const hip = parseFloat($("hip").value), icv = parseFloat($("icv").value);
+  const pre = parseInt($("pretest").value, 10) / 100;
+  $("pt-out").textContent = Math.round(pre * 100) + "%";
+  document.querySelectorAll('input[name="pp"]').forEach(r => (r.checked = +r.value === Math.round(pre * 100)));
+  const dep = radio("dep"), apoe = radio("apoe");
+
+  const warn = [];
+  const complete = [age, educ, hip, icv].every(Number.isFinite) && dep && apoe;
+  if (!complete) warn.push("Enter age, education, both volumes, depression and APOE status to calculate a result.");
+  if (Number.isFinite(age) && (age < 42 || age > 97)) warn.push(`The scale was derived on ages 42–97; age ${age} is an extrapolation.`);
+  // ranges from the 814-person OASIS-3 cohort (FreeSurfer): see scripts/31_oasis3_cohort.py
+  if (Number.isFinite(hip) && hip < 100) warn.push("Hippocampal volume looks like cm³. Enter it in mm³ (typically 5,580–9,520).");
+  else if (Number.isFinite(hip) && (hip < 4010 || hip > 10870)) warn.push(`Hippocampal volume ${hip.toLocaleString()} mm³ is outside the cohort's range (4,010–10,870). The result is an extrapolation; check the value and the software used.`);
+  if (Number.isFinite(icv) && icv < 10000) warn.push("Intracranial volume looks like cm³ or litres. Enter it in mm³ (typically 1,160,000–1,840,000).");
+  else if (Number.isFinite(icv) && (icv < 870000 || icv > 2030000)) warn.push(`Intracranial volume ${icv.toLocaleString()} mm³ is outside the cohort's range (870,000–2,030,000). The result is an extrapolation; check the value.`);
+  const ratio = hip / icv * 1000;
+  if (complete && !warn.length && (ratio < 2.5 || ratio > 8.4)) warn.push("The hippocampus-to-intracranial ratio is outside the cohort's range (2.5–8.4). Check that both volumes come from the same scan.");
+  $("warn").hidden = warn.length === 0;
+  $("warn").textContent = warn.join(" ");
+  if (!complete) {
+    document.documentElement.style.setProperty("--cat", "var(--faint)");
+    for (const id of ["score", "m-post", "m-lr", "dock-risk", "dock-score"]) $(id).textContent = "–";
+    for (const id of ["m-post-r", "m-lr-r", "people-cap", "contrib-bar", "contrib-list", "bell"]) $(id).innerHTML = "";
+    $("pill").textContent = "Incomplete"; $("dock-pill").textContent = "Incomplete";
+    $("headline").textContent = "Waiting for patient details"; $("advice").textContent = "Fill in steps 1–3, or load an example.";
+    $("dial").style.strokeDashoffset = 326.7; $("bell-cap").textContent = "–"; $("marker").textContent = "–";
+    [...$("people").children].forEach(el => (el.className = ""));
+    document.querySelectorAll(".cell, .cats span").forEach(c => c.classList.remove("on"));
+    return;
+  }
+
+  const pAge = age < 60 ? 0 : AGE_PTS.filter(([lo]) => age >= lo).pop()[1];
+  const expected = NORM.intercept + NORM.slope * age;
+  const z = (ratio - expected) / NORM.sd;
+  const hb = HIP_BANDS.find(b => z < b.max);
+  const parts = [
+    { key: "age", name: "Age", detail: `${age} years`, pts: pAge },
+    { key: "hip", name: "Hippocampal volume", detail: `${z >= 0 ? "+" : ""}${z.toFixed(2)} SD for age, ${hb.label} normal`, pts: hb.pts },
+    { key: "edu", name: "Education", detail: `${educ} years`, pts: educ <= 12 ? 1 : 0 },
+    { key: "dep", name: "Recent depression", detail: dep === "1" ? "Yes" : "No", pts: 2 * +dep },
+    { key: "apoe", name: "APOE ε4", detail: apoe === "u" ? "Unknown, scored 0" : apoe === "1" ? "Carrier" : "Non-carrier", pts: apoe === "1" ? 1 : 0 },
+    { key: "htn", name: "Hypertension", detail: radio("htn") === "1" ? "Yes, no added risk in cohort" : "No", pts: 0 },
+  ];
+  const total = parts.reduce((s, p) => s + p.pts, 0);
+  const band = BANDS.find(b => total >= b.lo && total <= b.hi);
+  const cat = CATS[catOf(total)];
+  const preOdds = pre / (1 - pre);
+  const toP = lr => { const o = preOdds * lr; return o / (1 + o); };
+  const post = toP(band.lr), postLo = toP(band.ci[0]), postHi = toP(band.ci[1]);
+
+  document.documentElement.style.setProperty("--cat", `var(${cat.color})`);
+  $("score").textContent = total;
+  $("dial").style.strokeDashoffset = (326.7 * (1 - total / 16)).toFixed(1);
+  $("pill").textContent = cat.name; $("headline").textContent = cat.head; $("advice").textContent = cat.advice;
+  $("m-post").textContent = pct(post); $("m-post-r").textContent = `95% CI ${pct(postLo)}–${pct(postHi)}`;
+  $("m-lr").textContent = fmtLR(band.lr); $("m-lr-r").textContent = `${fmtLR(band.ci[0])}–${fmtLR(band.ci[1])}`;
+  $("m-pre").textContent = pct(pre);
+
+  const n = Math.round(post * 100), nHi = Math.round(postHi * 100), nLo = Math.round(postLo * 100);
+  [...$("people").children].forEach((el, i) => { el.className = i < nLo ? "on" : i < n ? "on" : i < nHi ? "maybe" : ""; });
+  $("people").setAttribute("aria-label", `About ${n} of 100 similar people would develop impairment within 5 years.`);
+  $("people-cap").innerHTML = `About <b>${n}</b> of 100 people with this profile would develop cognitive impairment within 5 years (plausible range ${nLo}–${nHi}).`;
+
+  const scored = parts.filter(p => p.pts > 0);
+  $("contrib-bar").innerHTML = scored.length
+    ? scored.map(p => `<span style="flex-grow:${p.pts};background:${FACTOR_COLORS[p.key]}" title="${p.name}: ${p.pts}"></span>`).join("")
+    : "";
+  $("contrib-list").innerHTML = parts.map(p =>
+    `<div class="contrib-row${p.pts ? "" : " zero"}"><i style="background:${FACTOR_COLORS[p.key]}"></i>
+       <span>${p.name}<small>${p.detail}</small></span><b>+${p.pts}</b></div>`).join("");
+
+  drawBell(z);
+  $("bell-cap").innerHTML = `Patient: <b>${z >= 0 ? "+" : ""}${z.toFixed(2)} SD</b>`;
+
+  document.querySelectorAll(".cell").forEach(c => c.classList.toggle("on", +c.dataset.s === total));
+  document.querySelectorAll(".cats span").forEach(s => s.classList.toggle("on", s.dataset.cat === catOf(total)));
+  $("marker").style.left = `${((total + 0.5) / 17) * 100}%`;
+  $("marker").textContent = `${pct(post)} · score ${total}`;
+
+  $("dock-pill").textContent = cat.name; $("dock-risk").textContent = pct(post); $("dock-score").textContent = total;
+}
+
+document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => {
+  const el = $(b.dataset.step); const v = (parseFloat(el.value) || 0) + +b.dataset.d;
+  el.value = Math.max(+el.min, Math.min(+el.max, v)); compute();
+}));
+document.querySelectorAll("#f input").forEach(el => el.addEventListener("input", compute));
+document.querySelectorAll('input[name="pp"]').forEach(r => r.addEventListener("change", () => { $("pretest").value = r.value; compute(); }));
+document.querySelectorAll("[data-ex]").forEach(b => b.addEventListener("click", () => load(EXAMPLES[b.dataset.ex])));
+$("clear").addEventListener("click", () => {
+  for (const k of ["age", "educ", "hip", "icv"]) $(k).value = "";
+  document.querySelectorAll('#f input[type="radio"]:not([name="pp"])').forEach(r => (r.checked = false));
+  compute();
+});
+$("f").addEventListener("submit", e => e.preventDefault());
+$("pretest").value = 18;
+load(EXAMPLES.medium);
+</script>
